@@ -54,6 +54,31 @@ body.no-scroll {
     padding-bottom: 4px;
 }
 
+.structure-info-container {
+    margin-bottom: 8px;
+}
+
+.structure-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #4a3728;
+    white-space: pre-line;
+}
+
+.verb-display {
+    font-size: 16px;
+    font-weight: bold;
+    color: #4a3728;
+    font-weight: 600;
+    background: #f5f0e3;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.verb-display.hidden {
+    display: none;
+}
+
 .sentence-container {
     display: flex;
     align-items: center;
@@ -339,6 +364,14 @@ h1 {
         font-size: 24px;
     }
 
+    .structure-text {
+        font-size: 18px;
+    }
+
+    .verb-display {
+        font-size: 18px;
+    }
+
     .sentence-text {
         font-size: 32px;
     }
@@ -390,6 +423,14 @@ h1 {
         font-size: 18px;
     }
 
+    .structure-text {
+        font-size: 14px;
+    }
+
+    .verb-display {
+        font-size: 14px;
+    }
+
     .sentence-text {
         font-size: 20px;
     }
@@ -434,6 +475,14 @@ h1 {
 
     h1 {
         font-size: 40px;
+    }
+
+    .structure-text {
+        font-size: 20px;
+    }
+
+    .verb-display {
+        font-size: 20px;
     }
 
     .sentence-text {

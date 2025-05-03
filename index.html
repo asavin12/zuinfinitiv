@@ -16,6 +16,12 @@
         <p id="stats" class="text-sm md:text-base text-center mb-4">Tổng số câu hỏi: 0 | Đúng: 0 | Sai: 0</p>
         <div class="sentence-section mb-6">
             <h2 class="text-lg md:text-xl font-semibold mb-2" id="section-title">Động từ</h2>
+            <div class="structure-info-container mb-2">
+                <p id="structure-info" class="structure-text"></p>
+            </div>
+            <div id="verb-display" class="verb-display mb-2 hidden">
+                <p>Động từ: <span id="verb-text"></span> (<span id="verb-translation"></span>)</p>
+            </div>
             <div class="sentence-container">
                 <span id="sentence" class="sentence-text">Chưa có</span>
             </div>
@@ -57,5 +63,6 @@
     </div>
 
     <script src="app.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93a02b90cba27bbd',t:'MTc0NjI3OTYyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

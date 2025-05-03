@@ -67,6 +67,30 @@ const zuInfinitivVerbs = [
             { verb: "es ist erlaubt", translation: "được phép", usage: "được phép làm gì" },
             { verb: "es ist verboten", translation: "bị cấm", usage: "bị cấm làm gì" }
         ]
+    },
+    {
+        category: "Cấu trúc mục đích: um ... zu",
+        verbs: [
+            { verb: "um ... zu", translation: "để mà", usage: "diễn tả mục đích của hành động" }
+        ]
+    },
+    {
+        category: "Cấu trúc phủ định: ohne ... zu",
+        verbs: [
+            { verb: "ohne ... zu", translation: "mà không", usage: "diễn tả hành động không được thực hiện" }
+        ]
+    },
+    {
+        category: "Cấu trúc thay thế: anstatt ... zu",
+        verbs: [
+            { verb: "anstatt ... zu", translation: "thay vì", usage: "diễn tả hành động được thay thế bằng hành động khác" }
+        ]
+    },
+    {
+        category: "Cấu trúc: es finden ... zu",
+        verbs: [
+            { verb: "es finden ... zu", translation: "thấy ... khi", usage: "diễn tả cảm nhận khi làm gì" }
+        ]
     }
 ];
 
@@ -197,6 +221,75 @@ function fixJson(jsonStr) {
             return JSON.parse(jsonStr);
         } catch {
             return null;
+        }
+    }
+}
+
+// Đánh giá câu người dùng qua API
+async function evaluateSentenceWithAPI(correctSentence, userSentence, verb, sentenceTranslation) {
+    const prompt = `
+Kiểm tra bản dịch từ câu tiếng Việt '${sentenceTranslation}' sang câu tiếng Đức '${userSentence}'. 
+Câu tiếng Việt '${sentenceTranslation}' được dịch từ câu tiếng Đức gốc '${correctSentence}', sử dụng từ '${verb}' để thể hiện ý nghĩa chính. 
+Hãy đánh giá xem bản dịch tiếng Đức '${userSentence}' có khớp với câu gốc '${correctSentence}', sử dụng đúng từ '${verb}', và phù hợp với ngữ pháp, từ vựng, chính tả ở trình độ A1-B1 hay không.
+
+Yêu cầu:
+- Nếu bản dịch chính xác (khớp với '${correctSentence}', sử dụng đúng từ '${verb}', ngữ pháp, từ vựng, chính tả phù hợp A1-B1):
+  - Trả về phản hồi: "Bản dịch chính xác phù hợp trình độ!"
+  - Thêm giải thích ngắn gọn về cách sử dụng từ '${verb}' trong ngữ cảnh, kèm mẹo học (ví dụ: cách nhớ giống danh từ hoặc cấu trúc câu).
+- Nếu bản dịch chưa chính xác (khác '${correctSentence}', sai từ '${verb}', ngữ pháp, từ vựng, hoặc chính tả):
+  - Chỉ ra lỗi cụ thể:
+    - Nếu sai từ '${verb}', nêu từ sai và từ đúng, giải thích nghĩa và giống (der/die/das).
+    - Nếu sai ngữ pháp, mô tả lỗi (ví dụ: sai thứ tự từ, chia động từ) kèm ví dụ minh họa.
+    - Nếu sai chính tả, chỉ rõ lỗi và cách sửa.
+    - Nếu từ vựng không phù hợp A1-B1, gợi ý từ đơn giản hơn.
+    - Nếu bản dịch không khớp với '${correctSentence}', giải thích sự khác biệt và tại sao không đúng.
+  - Cung cấp nghĩa của từ quan trọng trong câu tiếng Việt mà người dùng có thể chưa hiểu (ngoài '${verb}'), kèm giống danh từ (der/die/das).
+  - Đưa ra câu tiếng Đức đúng (khớp với '${correctSentence}'), sử dụng từ '${verb}', phù hợp ngữ cảnh của câu tiếng Việt.
+  - Thêm mẹo học tập: cách nhớ từ, giống, hoặc cấu trúc ngữ pháp liên quan.
+  - Đề xuất một từ đồng nghĩa hoặc cách diễn đạt thay thế cho '${verb}' (nếu có) để mở rộng vốn từ.
+- Phản hồi phải bằng tiếng Việt, ngắn gọn, rõ ràng, dễ hiểu, khuyến khích người học.
+- Nếu bản dịch không chứa từ '${verb}' hoặc câu không hợp lệ, nêu rõ lý do và cung cấp câu đúng.
+
+Trả về dưới dạng JSON hợp lệ với hai khóa:
+- check: boolean (true nếu đúng, false nếu sai)
+- feedback: chuỗi (phản hồi chi tiết bằng tiếng Việt)
+
+Định dạng JSON: Trả về một đối tượng JSON với khóa check và feedback. Ví dụ:
+{
+  "check": true,
+  "feedback": "Bản dịch chính xác phù hợp trình độ! Từ 'die Rettung' (sự cứu nguy, danh từ giống die) được dùng đúng ngữ cảnh, khớp với câu gốc. Mẹo học: Ghi nhớ giống 'die' bằng cách liên tưởng 'Rettung' là hành động cứu giúp, thường gắn với nữ tính trong tiếng Đức."
+}
+hoặc
+{
+  "check": false,
+  "feedback": "Chưa chính xác! Bản dịch không khớp với câu gốc '${correctSentence}'. Bạn dùng sai từ 'Retung' (sai chính tả). Nên dùng 'die Rettung', nghĩa: sự cứu nguy, danh từ giống die. Lỗi ngữ pháp: Thứ tự từ không đúng, trong tiếng Đức động từ phải đứng vị trí thứ hai trong câu chính. Ví dụ: 'Ich rufe die Rettung' (Tôi gọi sự cứu nguy). Từ quan trọng: 'der Ausweg' (lối thoát, danh từ giống der). Câu đúng: '${correctSentence}'. Mẹo học: Ghi nhớ giống 'die Rettung' bằng cách liên tưởng đến hành động cứu giúp. Từ đồng nghĩa: 'die Hilfe' (sự giúp đỡ, giống die)."
+}
+
+Lưu ý:
+- Phản hồi phải là JSON hợp lệ, không chứa markdown, code block, hoặc văn bản ngoài JSON.
+- Đảm bảo câu đúng sử dụng từ '${verb}' tự nhiên, phù hợp ngữ cảnh, và khớp với '${correctSentence}'.
+- Nếu không thể đánh giá (ví dụ: câu nhập không hợp lệ), trả về JSON với feedback giải thích lỗi, ví dụ:
+{
+  "check": false,
+  "feedback": "Câu nhập không hợp lệ, vui lòng kiểm tra lại."
+}
+`;
+
+    for (let retry = 0; retry < MAX_API_RETRIES; retry++) {
+        try {
+            const response = await tryWithDifferentKey(prompt, VERIFY_KEY);
+            if (!response) continue;
+            return response;
+        } catch (error) {
+            console.warn(`Lỗi API retry ${retry + 1}: ${error}`);
+            if (retry === MAX_API_RETRIES - 1) {
+                showPopup('Lỗi API', 'Không thể đánh giá câu. Vui lòng thử lại sau.');
+                return {
+                    check: false,
+                    feedback: `Lỗi API: Không thể đánh giá câu. Câu đúng: ${correctSentence}`
+                };
+            }
+            await new Promise(resolve => setTimeout(resolve, 500));
         }
     }
 }
@@ -339,6 +432,9 @@ async function nextQuestion() {
     isVerbAnswered = false;
     isSentenceAnswered = false;
 
+    // Ẩn verb-display khi bắt đầu câu hỏi mới
+    document.getElementById('verb-display').classList.add('hidden');
+
     if (ruleStack.length > 0) {
         // Bước 1: Hiển thị động từ mới
         const ruleId = ruleStack.shift();
@@ -418,6 +514,11 @@ async function showSentence() {
         return;
     }
 
+    // Hiển thị động từ và nghĩa
+    document.getElementById('verb-text').textContent = currentVerb;
+    document.getElementById('verb-translation').textContent = currentTranslation;
+    document.getElementById('verb-display').classList.remove('hidden');
+
     document.getElementById('section-title').textContent = 'Câu ví dụ (bản dịch tiếng Việt)';
     document.getElementById('sentence').textContent = currentSentenceTranslation;
     document.getElementById('input-label').textContent = 'Nhập câu tiếng Đức:';
@@ -433,7 +534,7 @@ async function showSentence() {
 }
 
 // Kiểm tra câu trả lời
-function checkAnswer() {
+async function checkAnswer() {
     console.log('checkAnswer called, isVerbAnswered:', isVerbAnswered, 'isSentenceAnswered:', isSentenceAnswered);
     const userAnswer = document.getElementById('answer').value.trim();
     if (!userAnswer) {
@@ -448,7 +549,7 @@ function checkAnswer() {
             document.getElementById('feedback').textContent = `Đúng! 🎉 Vui lòng nhập câu ví dụ sử dụng "${currentVerb}".`;
             document.getElementById('feedback').classList.add('correct');
             isVerbAnswered = true;
-            showSentence();
+            await showSentence();
         } else {
             document.getElementById('feedback').textContent = `Sai! 😔 Động từ đúng: ${currentVerb}`;
             document.getElementById('feedback').classList.add('wrong');
@@ -456,9 +557,11 @@ function checkAnswer() {
         }
         console.log('checkAnswer: Verb check, isCorrect:', isCorrect);
     } else {
-        // Kiểm tra câu ví dụ
-        const isCorrect = userAnswer.toLowerCase() === currentExample.toLowerCase();
-        const feedbackText = `Câu đúng: ${currentExample}\nNghĩa: ${currentSentenceTranslation}\nLoại động từ: ${currentCategory}\nGiải thích: ${currentExplanation}`;
+        // Kiểm tra câu ví dụ qua API
+        const evaluation = await evaluateSentenceWithAPI(currentExample, userAnswer, currentVerb, currentSentenceTranslation);
+        const isCorrect = evaluation.check;
+        let feedbackText = evaluation.feedback;
+        feedbackText += `\n\nLoại động từ: ${currentCategory}\nGiải thích: ${currentExplanation}`;
 
         if (isCorrect) {
             totalCorrect++;
